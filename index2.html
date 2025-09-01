@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>QR Code Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #f6f8fa;
+            --card-color: #fff;
+            --primary-color: #0b67ff;
+            --muted-color: #666;
+            --border-color: #e6e9ef;
+            --shadow-color: rgba(20, 20, 50, 0.06);
+        }
+
+        body {
+            font-family: 'Inter', system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 28px;
+            background: linear-gradient(180deg, #eef2ff, white);
+        }
+
+        .card {
+            width: 100%;
+            max-width: 760px;
+            background: var(--card-color);
+            box-shadow: 0 8px 30px var(--shadow-color);
+            border-radius: 12px;
+            padding: 22px;
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-size: 20px;
+        }
+
+        p.lead {
+            margin: 0 0 18px;
+            color: var(--muted-color);
+        }
+
+        .row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            flex: 1;
+            position: relative;
+        }
+
+        input[type=text] {
+            width: 100%;
+            padding: 12px 14px;
+            padding-right: 40px; 
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 15px;
+            box-sizing: border-box;
+        }
+
+        .clear-input {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--muted-color);
+            cursor: pointer;
+            font-size: 16px;
+            display: none;
+        }
+
+        button {
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .output-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        @media (min-width: 768px) {
+            .output-container {
+                flex-direction: row;
+                align-items: flex-start;
+            }
+        }
+
+        .qr-box {
+            width: 300px;
+            height: 300px;
+            background: #fff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-color);
+            flex-shrink: 0;
+            overflow: hidden;
+            padding: 10px;
+        }
+        
+        .qr-box canvas {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .meta {
+            flex: 1;
+            text-align: left;
+        }
+
+        .meta .muted {
+            color: var(--muted-color);
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        #resultUrl {
+            margin: 0 0 15px;
+            word-break: break-all;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        a.btn, .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            border: 1px solid var(--border-color);
+            color: #444;
+            transition: background-color 0.3s ease;
+        }
+
+        a.btn:hover, .btn:hover {
+            background-color: #f0f2f5;
+        }
+
+        .note {
+            margin-top: 15px;
+            color: var(--muted-color);
+            font-size: 13px;
+        }
+
+        #qr-placeholder {
+            color: #999;
+            text-align: center;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>QR Code Generator</h1>
+        <p class="lead">Paste any URL below, click Generate — the QR will appear and you can download the image.</p>
+        <div class="row">
+            <div class="input-group">
+                <input id="urlInput" type="text" placeholder="Paste URL here (e.g., https://example.com)" spellcheck="false" />
+                <button class="clear-input" id="clearBtn"><i class="fas fa-times"></i></button>
+            </div>
+            <button id="genBtn">Generate</button>
+        </div>
+        <div class="output-container">
+            <div class="qr-box" id="qrBox">
+                <div id="qrcode"></div>
+                <div id="qr-placeholder">No QR yet</div>
+            </div>
+            <div class="meta">
+                <div class="muted small">Result</div>
+                <div id="resultUrl">Paste a link and press Generate.</div>
+                <div class="controls">
+                    <a id="downloadLink" class="btn" download="qr.png" style="display: none;"><i class="fas fa-download"></i> Download PNG</a>
+                    <button id="copyBtn" class="btn" style="display: none;"><i class="fas fa-copy"></i> Copy Link</button>
+                    <button id="shareBtn" class="btn" style="display: none;"><i class="fas fa-share-alt"></i> Share</button>
+                </div>
+                <p class="note">This page generates QR codes locally using the qrcode.js library. No external requests are made to generate the image, ensuring your data stays private.</p>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        const genBtn = document.getElementById('genBtn');
+        const urlInput = document.getElementById('urlInput');
+        const qrBox = document.getElementById('qrBox');
+        const qrcodeDiv = document.getElementById('qrcode');
+        const qrPlaceholder = document.getElementById('qr-placeholder');
+        const downloadLink = document.getElementById('downloadLink');
+        const copyBtn = document.getElementById('copyBtn');
+        const shareBtn = document.getElementById('shareBtn');
+        const resultUrl = document.getElementById('resultUrl');
+        const clearBtn = document.getElementById('clearBtn');
+        let qrCodeInstance = null;
+
+        genBtn.addEventListener('click', generateQrCode);
+        urlInput.addEventListener('input', () => {
+            clearBtn.style.display = urlInput.value ? 'block' : 'none';
+        });
+        clearBtn.addEventListener('click', () => {
+            urlInput.value = '';
+            clearBtn.style.display = 'none';
+            resetUI();
+        });
+        copyBtn.addEventListener('click', copyUrl);
+        shareBtn.addEventListener('click', shareUrl);
+        urlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                generateQrCode();
+            }
+        });
+
+        function generateQrCode() {
+            let url = urlInput.value.trim();
+            if (!url) {
+                alert('Please enter a URL');
+                return;
+            }
+            if (!/^https?:\/\//i.test(url)) {
+                url = 'https://' + url;
+            }
+
+            if (qrCodeInstance) {
+                qrCodeInstance.makeCode(url);
+            } else {
+                qrcodeDiv.innerHTML = "";
+                qrCodeInstance = new QRCode(qrcodeDiv, {
+                    text: url,
+                    width: 250,
+                    height: 250,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            }
+
+            qrPlaceholder.style.display = 'none';
+            qrcodeDiv.style.display = 'block';
+            resultUrl.textContent = url;
+            downloadLink.style.display = 'inline-flex';
+            copyBtn.style.display = 'inline-flex';
+            shareBtn.style.display = navigator.share ? 'inline-flex' : 'none';
+
+            setTimeout(() => {
+                const qrCanvas = qrcodeDiv.querySelector('canvas');
+                if (qrCanvas) {
+                    downloadLink.href = qrCanvas.toDataURL("image/png");
+                }
+            }, 50);
+        }
+
+        function resetUI() {
+            if (qrCodeInstance) {
+                qrCodeInstance.clear();
+                qrCodeInstance = null;
+            }
+            qrcodeDiv.innerHTML = "";
+            qrPlaceholder.style.display = 'block';
+            resultUrl.textContent = 'Paste a link and press Generate.';
+            downloadLink.style.display = 'none';
+            copyBtn.style.display = 'none';
+            shareBtn.style.display = 'none';
+        }
+
+        function copyUrl() {
+            const urlToCopy = resultUrl.textContent;
+            navigator.clipboard.writeText(urlToCopy).then(() => {
+                alert('URL copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        }
+
+        function shareUrl() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'QR Code for a Link',
+                    text: 'Scan this QR code or use the link to visit the website.',
+                    url: resultUrl.textContent,
+                }).catch((error) => console.log('Error sharing', error));
+            } else {
+                alert('Web Share API is not supported in this browser.');
+            }
+        }
+    </script>
+</body>
+</html>
