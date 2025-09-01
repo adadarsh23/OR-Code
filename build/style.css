@@ -47,7 +47,9 @@ header {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
+  flex-wrap: wrap;
 }
+
 
 h1 {
   margin: 0;
@@ -230,6 +232,12 @@ body.dark-mode .btn-secondary:hover {
   padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;
+}
+header .header-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+
 }
 
 #theme-toggle:hover {
