@@ -15,7 +15,15 @@ const qrSizeSelect = document.getElementById('qrSize');
 const qrDarkColorInput = document.getElementById('qrDarkColor');
 const qrLightColorInput = document.getElementById('qrLightColor');
 const errorCorrectionSelect = document.getElementById('errorCorrection');
+const contactFormContainer = document.getElementById("contactFormContainer");
+const fileUploadContainer = document.getElementById("fileUploadContainer");
+const fileInput = document.getElementById("fileInput");
 let qrCodeInstance = null;
+contentTypeSelect.addEventListener("change", () => {
+  contactFormContainer.style.display = contentTypeSelect.value === "contact" ? "block" : "none";
+  fileUploadContainer.style.display = contentTypeSelect.value === "file" ? "block" : "none";
+});
+
 
 const translations = {
   en: {
@@ -34,11 +42,15 @@ const translations = {
     pastePlaceholder: {
       url: 'Paste URL here (e.g., https://example.com)',
       text: 'Enter text here',
-      phone: 'Enter phone number (e.g., +1234567890)'
+      phone: 'Enter phone number (e.g., +1234567890)',
+      sms: 'Enter SMS in format: number|message (e.g., +1234567890|Hello)',
+      email: 'Enter email in format: address|subject|body (e.g., test@example.com|Hello|This is a test)',
+
     },
     alertEnter: 'Please enter content.',
     alertShare: 'Web Share API is not supported in this browser.',
-    alertCopy: 'Content copied to clipboard!'
+    alertCopy: 'Content copied to clipboard!',
+    alertContact: 'Please enter at least a name, phone, or email for the contact.'
   },
   es: {
     title: 'Generador de Código QR',
@@ -56,11 +68,14 @@ const translations = {
     pastePlaceholder: {
       url: 'Pega la URL aquí (ej., https://ejemplo.com)',
       text: 'Introduce texto aquí',
-      phone: 'Introduce el número de teléfono (ej., +1234567890)'
+      phone: 'Introduce el número de teléfono (ej., +1234567890)',
+      sms: 'Introduce SMS en formato: número|mensaje (ej., +1234567890|Hola)',
+      email: 'Introduce el correo en formato: dirección|asunto|cuerpo (ej., test@ejemplo.com|Hola|Este es un test)'
     },
     alertEnter: 'Por favor, introduce el contenido.',
     alertShare: 'La API de Compartir Web no es compatible con este navegador.',
-    alertCopy: 'Contenido copiado al portapapeles!'
+    alertCopy: 'Contenido copiado al portapapeles!',
+    alertContact: 'Por favor, introduce al menos un nombre, teléfono o correo para el contacto.',
   },
   fr: {
     title: 'Générateur de Code QR',
@@ -78,11 +93,15 @@ const translations = {
     pastePlaceholder: {
       url: 'Collez l\'URL ici (ex., https://exemple.com)',
       text: 'Entrez du texte ici',
-      phone: 'Entrez le numéro de téléphone (ex., +1234567890)'
+      phone: 'Entrez le numéro de téléphone (ex., +1234567890)',
+      sms: 'Entrez le SMS au format : numéro|message (ex., +1234567890|Bonjour)',
+      email: 'Entrez l\'email au format : adresse|sujet|corps (ex., test@exemple.com|Bonjour|Ceci est un test)'
     },
     alertEnter: 'Veuillez entrer du contenu.',
     alertShare: 'L\'API Web Share n\'est pas prise en charge dans ce navigateur.',
-    alertCopy: 'Contenu copié dans le presse-papiers !'
+    alertCopy: 'Contenu copié dans le presse-papiers !',
+    alertContact: 'Veuillez entrer au moins un nom, un téléphone ou un e-mail pour le contact.'
+
   }
 };
 
@@ -131,7 +150,7 @@ function setLanguage(lang) {
   document.title = translations[lang].title;
   const content = translations[lang].pastePlaceholder[contentTypeSelect.value];
   contentInput.placeholder = content;
-  resultContent.textContent = translations[lang].pastePlaceholder[contentTypeSelect.value];
+  // resultContent.textContent = translations[lang].pastePlaceholder[contentTypeSelect.value];
   localStorage.setItem('lang', lang);
 }
 
@@ -161,36 +180,154 @@ function setTheme(theme) {
   localStorage.setItem('theme', theme);
 }
 
+// function updatePlaceholder() {
+//   const lang = languageSelect.value;
+//   const type = contentTypeSelect.value;
+//   contentInput.placeholder = translations[lang].pastePlaceholder[type];
+//   resultContent.textContent = translations[lang].pastePlaceholder[type];
+// }
+
+// function generateQrCode() {
+//   let content = contentInput.value.trim();
+//   const type = contentTypeSelect.value;
+
+//   if (!content) {
+//     alert(translations[languageSelect.value].alertEnter);
+//     return;
+//   }
+
+//   // Dynamic content formatting based on type
+//   if (type === 'url') {
+//     if (!/^https?:\/\//i.test(content)) {
+//       content = 'https://' + content;
+//     }
+//   } else if (type === 'phone') {
+//     content = `tel:${content.replace(/\s/g, '')}`;
+//   }
+
+//   const size = qrSizeSelect.value;
+//   const darkColor = qrDarkColorInput.value;
+//   const lightColor = qrLightColorInput.value;
+//   const correctionLevel = errorCorrectionSelect.value;
+
+//   if (qrCodeInstance) {
+//     qrCodeInstance.clear();
+//     qrcodeDiv.innerHTML = "";
+//   }
+
+//   qrCodeInstance = new QRCode(qrcodeDiv, {
+//     text: content,
+//     width: parseInt(size),
+//     height: parseInt(size),
+//     colorDark: darkColor,
+//     colorLight: lightColor,
+//     correctLevel: QRCode.CorrectLevel[correctionLevel]
+//   });
+
+//   qrPlaceholder.style.display = 'none';
+//   qrcodeDiv.style.display = 'block';
+//   resultContent.textContent = content;
+//   downloadLink.style.display = 'inline-flex';
+//   copyBtn.style.display = 'inline-flex';
+//   shareBtn.style.display = navigator.share ? 'inline-flex' : 'none';
+
+//   // Wait for QR code to be generated, then set download link
+//   setTimeout(() => {
+//     const qrCanvas = qrcodeDiv.querySelector('canvas');
+//     if (qrCanvas) {
+//       downloadLink.href = qrCanvas.toDataURL("image/png");
+//     }
+//   }, 50);
+// }
+
 function updatePlaceholder() {
   const lang = languageSelect.value;
   const type = contentTypeSelect.value;
-  contentInput.placeholder = translations[lang].pastePlaceholder[type];
-  resultContent.textContent = translations[lang].pastePlaceholder[type];
+
+  if (type === 'contact') {
+    document.getElementById('contactFormContainer').style.display = 'block';
+    contentInput.style.display = 'none'; // hide normal input
+  } else {
+    document.getElementById('contactFormContainer').style.display = 'none';
+    contentInput.style.display = 'block';
+    contentInput.placeholder = translations[lang].pastePlaceholder[type];
+    // resultContent.textContent = translations[lang].pastePlaceholder[type];
+  }
 }
 
 function generateQrCode() {
-  let content = contentInput.value.trim();
   const type = contentTypeSelect.value;
+  let content = contentInput.value.trim();
 
-  if (!content) {
-    alert(translations[languageSelect.value].alertEnter);
-    return;
-  }
-
-  // Dynamic content formatting based on type
-  if (type === 'url') {
-    if (!/^https?:\/\//i.test(content)) {
-      content = 'https://' + content;
+  // 1) File handling
+  if (type === "file") {
+    if (fileInput.files.length === 0) {
+      alert("Please select an image or PDF file.");
+      return;
     }
-  } else if (type === 'phone') {
-    content = `tel:${content.replace(/\s/g, '')}`;
+    const file = fileInput.files[0];
+    content = URL.createObjectURL(file); // local URL
   }
 
-  const size = qrSizeSelect.value;
-  const darkColor = qrDarkColorInput.value;
-  const lightColor = qrLightColorInput.value;
-  const correctionLevel = errorCorrectionSelect.value;
+  // 2) Contact handling
+  else if (type === "contact") {
+    const name = document.getElementById('contactName').value.trim();
+    const phone = document.getElementById('contactPhone').value.trim();
+    const email = document.getElementById('contactEmail').value.trim();
+    const org = document.getElementById('contactOrg').value.trim();
+    const title = document.getElementById('contactTitle').value.trim();
+    const address = document.getElementById('contactAddress').value.trim();
+    const website = document.getElementById('contactWebsite').value.trim();
+    const note = document.getElementById('contactNote').value.trim();
 
+    if (!name && !phone && !email) {
+      alert(translations[languageSelect.value].alertContact);
+      return;
+    }
+
+    content =
+      `BEGIN:VCARD\nVERSION:3.0\n` +
+      (name ? `FN:${name}\n` : '') +
+      (phone ? `TEL:${phone}\n` : '') +
+      (email ? `EMAIL:${email}\n` : '') +
+      (org ? `ORG:${org}\n` : '') +
+      (title ? `TITLE:${title}\n` : '') +
+      (address ? `ADR:${address}\n` : '') +
+      (website ? `URL:${website}\n` : '') +
+      (note ? `NOTE:${note}\n` : '') +
+      `END:VCARD`;
+  }
+
+  // 3) Other types (url, phone, sms, email, text)
+  else {
+    if (!content) {
+      alert(translations[languageSelect.value].alertEnter);
+      return;
+    }
+    switch (type) {
+      case 'url':
+        if (!/^https?:\/\//i.test(content)) content = 'https://' + content;
+        break;
+      case 'phone':
+        content = `tel:${content.replace(/\s/g, '')}`;
+        break;
+      case 'sms':
+        const [number, message] = content.split('|', 2);
+        content = message ? `SMSTO:${number}:${message}` : `SMSTO:${number}`;
+        break;
+      case 'email':
+        const [addr, subject, body] = content.split('|');
+        let mailto = `mailto:${addr}`;
+        const params = [];
+        if (subject) params.push(`subject=${encodeURIComponent(subject)}`);
+        if (body) params.push(`body=${encodeURIComponent(body)}`);
+        if (params.length) mailto += '?' + params.join('&');
+        content = mailto;
+        break;
+    }
+  }
+
+  // 4) Generate QR
   if (qrCodeInstance) {
     qrCodeInstance.clear();
     qrcodeDiv.innerHTML = "";
@@ -198,13 +335,14 @@ function generateQrCode() {
 
   qrCodeInstance = new QRCode(qrcodeDiv, {
     text: content,
-    width: parseInt(size),
-    height: parseInt(size),
-    colorDark: darkColor,
-    colorLight: lightColor,
-    correctLevel: QRCode.CorrectLevel[correctionLevel]
+    width: parseInt(qrSizeSelect.value),
+    height: parseInt(qrSizeSelect.value),
+    colorDark: qrDarkColorInput.value,
+    colorLight: qrLightColorInput.value,
+    correctLevel: QRCode.CorrectLevel[errorCorrectionSelect.value]
   });
 
+  // Update UI
   qrPlaceholder.style.display = 'none';
   qrcodeDiv.style.display = 'block';
   resultContent.textContent = content;
@@ -212,14 +350,14 @@ function generateQrCode() {
   copyBtn.style.display = 'inline-flex';
   shareBtn.style.display = navigator.share ? 'inline-flex' : 'none';
 
-  // Wait for QR code to be generated, then set download link
+  // Add download link
   setTimeout(() => {
     const qrCanvas = qrcodeDiv.querySelector('canvas');
-    if (qrCanvas) {
-      downloadLink.href = qrCanvas.toDataURL("image/png");
-    }
+    if (qrCanvas) downloadLink.href = qrCanvas.toDataURL("image/png");
   }, 50);
 }
+
+
 
 function resetUI() {
   if (qrCodeInstance) {

@@ -38,6 +38,11 @@
         <option value=url>URL</option>
         <option value=text>Text</option>
         <option value=phone>Phone Number</option>
+        <option value=sms>SMS</option>
+        <option value=email>Email</option>
+        <option value=contact>Contact (vCard)</option>
+        <!-- Add in the Content Type dropdown -->
+        <option value="file">File (Image/PDF)</option>
       </select>
       <label for=qrSize data-lang=sizeLabel>Size:</label>
       <select id=qrSize>
@@ -45,6 +50,68 @@
         <option value=250 selected>Medium</option>
         <option value=350>Large</option>
       </select>
+    </div>
+    <div class="options-row" id="contactFormContainer" style="display:none;">
+      <fieldset>
+        <legend>Contact Information</legend>
+
+        <!-- Full Name -->
+        <div class="input-group">
+          <label for="contactName" class="sr-only">Full Name</label>
+          <input type="text" id="contactName" placeholder="Full Name" aria-label="Full Name" />
+        </div>
+
+        <!-- Phone Number -->
+        <div class="input-group">
+          <label for="contactPhone" class="sr-only">Phone Number</label>
+          <input type="tel" id="contactPhone" placeholder="Phone Number (e.g., +1234567890)"
+            aria-label="Phone Number" />
+        </div>
+
+        <!-- Email -->
+        <div class="input-group">
+          <label for="contactEmail" class="sr-only">Email Address</label>
+          <input type="email" id="contactEmail" placeholder="Email Address" aria-label="Email Address" />
+        </div>
+
+        <!-- Organization -->
+        <div class="input-group">
+          <label for="contactOrg" class="sr-only">Organization</label>
+          <input type="text" id="contactOrg" placeholder="Organization" aria-label="Organization" />
+        </div>
+
+        <!-- Job Title -->
+        <div class="input-group">
+          <label for="contactTitle" class="sr-only">Job Title</label>
+          <input type="text" id="contactTitle" placeholder="Job Title" aria-label="Job Title" />
+        </div>
+
+        <!-- Address -->
+        <div class="input-group">
+          <label for="contactAddress" class="sr-only">Address</label>
+          <input type="text" id="contactAddress" placeholder="Street, City, State, ZIP" aria-label="Address" />
+        </div>
+
+        <!-- Website -->
+        <div class="input-group">
+          <label for="contactWebsite" class="sr-only">Website</label>
+          <input type="url" id="contactWebsite" placeholder="Website (e.g., https://example.com)"
+            aria-label="Website" />
+        </div>
+
+        <!-- Notes -->
+        <div class="input-group">
+          <label for="contactNote" class="sr-only">Notes</label>
+          <textarea id="contactNote" placeholder="Notes" aria-label="Notes"></textarea>
+        </div>
+      </fieldset>
+    </div>
+    <div class="options-row" id="fileUploadContainer" style="display:none;">
+      <fieldset>
+        <legend>Upload File</legend>
+        <input type="file" id="fileInput" accept="image/*,.pdf" />
+        <p class="muted small">Supported: Images (JPG, PNG) or PDF</p>
+      </fieldset>
     </div>
     <div class=options-row>
       <label for=qrDarkColor>QR Color:</label>
